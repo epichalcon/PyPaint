@@ -10,8 +10,8 @@ from sklearn.utils import shuffle
 n_colors = 32
 
 # Load the Summer Palace photo
-rome = cv2.imread("rome.jpg")
-rome = cv2.resize(rome, None, fx=0.4, fy=0.4)
+rome = cv2.imread("dancing.jpg")
+#rome = cv2.resize(rome, None, fx=0.4, fy=0.4)
 rome = cv2.blur(rome, [3,3])
 
 # Convert to floats instead of the default 8 bits integer coding. Dividing by
