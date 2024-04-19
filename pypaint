@@ -50,7 +50,6 @@ def smoothen_channel(channel):
 
 ###
 
-
 #load and resize
 img = cv2.imread('C:\\Users\\maria\\Mariana Sapienza.jpg')
 img = cv2.resize(img,None, fx = 0.5, fy= 0.5)
@@ -58,10 +57,6 @@ img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
 #disminuir ruido
 blur_img = cv2.GaussianBlur(img,(3,3),0)
-
-#resaltar contornos
-#y_kernel =np.array([[0,-1,0],[-1,5,-1],[0,-1,0]])
-#shar_img = cv2.filter2D(img,-1,my_kernel)
 
 #Visualizar imagenes:
 fig, axs = plt.subplots(1,2, figsize=(20,5))
@@ -72,10 +67,6 @@ axs[0].axis('off')
 axs[1].imshow(blur_img)
 axs[1].set_title('Blurred Image')
 axs[1].axis('off')
-
-#axs[2].imshow(shar_img)
-#axs[2].set_title('Sharpened Image')
-#axs[2].axis('off')
 
 plt.show()
 cv2.waitKey(0)
@@ -126,10 +117,6 @@ B= img_recolored[:, :, 2]
 Rsmooth = smoothen_channel(R).astype(np.uint8)
 Gsmooth = smoothen_channel(G).astype(np.uint8)
 Bsmooth = smoothen_channel(B).astype(np.uint8)
-
-#Rsmooth = Rsmooth.astype(np.uint8)
-#Gsmooth = Gsmooth.astype(np.uint8)
-#Bsmooth = Bsmooth.astype(np.uint8)
 
 smoothed_img = cv2.merge((Rsmooth, Gsmooth, Bsmooth))
 
