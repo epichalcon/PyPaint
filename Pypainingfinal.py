@@ -5,7 +5,7 @@ from sklearn.cluster import KMeans
 
 n_colors = 20
 foto = 'rome.jpg'
-resizing = 1
+resizing = 0.5
 smoothen_ratio = 4
 
 ####funciones
@@ -141,6 +141,10 @@ B= img_recolored[:, :, 2]
 Rsmooth = smoothen_channel(R).astype(np.uint8)
 Gsmooth = smoothen_channel(G).astype(np.uint8)
 Bsmooth = smoothen_channel(B).astype(np.uint8)
+
+Rsmooth = smoothen_channel(Rsmooth).astype(np.uint8)
+Gsmooth = smoothen_channel(Gsmooth).astype(np.uint8)
+Bsmooth = smoothen_channel(Bsmooth).astype(np.uint8)
 
 smoothed_img = cv2.merge((Rsmooth, Gsmooth, Bsmooth))
 
