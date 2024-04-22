@@ -5,7 +5,7 @@ from sklearn.cluster import KMeans
 
 n_colors = 20
 foto = 'rome.jpg'
-resizing = 0.5
+resizing = 1
 smoothen_ratio = 4
 
 ####funciones
@@ -53,15 +53,30 @@ def smoothen_channel(channel):
            smooth_channel [y,x] = vvalue(channel, x, y, smoothen_ratio) 
     return smooth_channel
 
+
+def get_outlines(mat):
+    ymax, xmax, _ = mat.shape
+
+    outlines = np.array([
+        255 if neighbors(mat, x, y) else 0
+        for y in range(0, ymax)
+        for x in range(0, xmax)
+    ])
+
+    return outlines.reshape((ymax, xmax))
+
 ###
 
 #load and resize
+print('Loading image...')
 img = cv2.imread(foto)
 img = cv2.resize(img,None, fx = resizing, fy= resizing)
 
 #disminuir ruido
+print('Bluring image...')
 blur_img = cv2.GaussianBlur(img,(3,3),0)
 
+'''
 #Visualizar imagenes:
 fig, axs = plt.subplots(1,2, figsize=(20,5))
 axs[0].imshow(img)
@@ -74,16 +89,20 @@ axs[1].axis('off')
 
 plt.show()
 cv2.waitKey(0)
+'''
 
 #Normalizing:
 data=blur_img/255.0
 data=data.reshape(-1,3)
 
 #K-means
+print('Quantizising image...')
 kmeans = KMeans(n_colors)
 kmeans.fit(data)
 y_est = kmeans.predict(data) #cluster center 
 new_colors=kmeans.cluster_centers_[kmeans.labels_] #backproject to the color centers
+
+'''
 
 #3D point cloud
 fig= plt.figure(figsize=(10,7))
@@ -107,12 +126,14 @@ _=ax.set_zlabel('B')
 
 plt.show()
 cv2.waitKey(0)
+'''
 
 #Recolored image with Kmeans
 img_recolored = new_colors.reshape(blur_img.shape) * 255
 img_recolored = img_recolored.astype(np.uint8)
 
 #Divide channels to do vvalue, smoothen y neighbors
+print('Smoothing image...')
 R= img_recolored[:, :, 0]
 G= img_recolored[:, :, 1]
 B= img_recolored[:, :, 2]
@@ -123,10 +144,14 @@ Bsmooth = smoothen_channel(B).astype(np.uint8)
 
 smoothed_img = cv2.merge((Rsmooth, Gsmooth, Bsmooth))
 
+#Get contours
+print('getting contours...')
+edges = get_outlines(smoothed_img)
 
-cv2.imshow("original", img)
-cv2.imshow("recolored", img_recolored)
+cv2.imwrite('edges.jpg', edges)
+
 cv2.imshow("smoothed", smoothed_img)
+cv2.imshow("edges", cv2.imread('edges.jpg'))
 
 plt.show()
 cv2.waitKey(0)
