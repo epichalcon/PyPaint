@@ -11,7 +11,7 @@ smoothen_ratio = 4
 ####funciones
 
 def vvalue (mat, x, y, xyrange):
-    ymax, xmax = mat.shape[:2]
+    ymax, xmax = mat.shape
     modas = mat[max(y - xyrange, 0):min(y + xyrange, ymax),
                 max(x - xyrange, 0):min(x + xyrange, xmax)].flatten()
     modas = modas.astype(int) 
@@ -21,14 +21,14 @@ def vvalue (mat, x, y, xyrange):
 
 
 def smoothen(mat, filter_size):
-    ymax, xmax = mat.shape[:2]
+    ymax, xmax = mat.shape
     flat_mat = np.array([
         vvalue(mat, x, y, filter_size)
         for y in range(0, ymax)
         for x in range(0, xmax)
     ])
 
-    return flat_mat.reshape(mat.shape[:2])
+    return flat_mat.reshape(mat.shape)
 
 
 def neighbors(mat, x, y):
@@ -76,80 +76,23 @@ img = cv2.resize(img,None, fx = resizing, fy= resizing)
 print('Bluring image...')
 blur_img = cv2.GaussianBlur(img,(3,3),0)
 
-'''
-#Visualizar imagenes:
-fig, axs = plt.subplots(1,2, figsize=(20,5))
-axs[0].imshow(img)
-axs[0].set_title('Original Image')
-axs[0].axis('off')
-
-axs[1].imshow(blur_img)
-axs[1].set_title('Blurred Image')
-axs[1].axis('off')
-
-plt.show()
-cv2.waitKey(0)
-'''
-
 #Normalizing:
-data=blur_img/255.0
-data=data.reshape(-1,3)
+data=blur_img.reshape(-1,3)
 
 #K-means
 print('Quantizising image...')
 kmeans = KMeans(n_colors)
 kmeans.fit(data)
-y_est = kmeans.predict(data) #cluster center 
+coded_image = kmeans.predict(data) #cluster center 
 new_colors=kmeans.cluster_centers_[kmeans.labels_] #backproject to the color centers
 
-'''
-
-#3D point cloud
-fig= plt.figure(figsize=(10,7))
-ax= fig.add_subplot(projection='3d')
-data_sampled=data[::50] #1 punto cada 50 (velocidad)
-ax.scatter(data_sampled[:,0], data_sampled[:,1],data_sampled[:,2], marker='.', color=data_sampled)
-ax.set_title('3D Point Cloud of Original Data')
-ax.set_xlabel('R')
-ax.set_ylabel('G')
-_=ax.set_zlabel('B')
-
-# 3d después de Kmeans
-fig = plt.figure(figsize=(10,7))
-ax = fig.add_subplot(projection = '3d')
-data_sampled = new_colors[::50]
-ax.scatter(data_sampled[:,0], data_sampled[:,1],data_sampled[:,2], marker='.', color= data_sampled, s=200)
-ax.set_title('3D Point Cloud of Kmeans Data')
-ax.set_xlabel('R')
-ax.set_ylabel('G')
-_=ax.set_zlabel('B')
-
-plt.show()
-cv2.waitKey(0)
-'''
 
 #Recolored image with Kmeans
-img_recolored = new_colors.reshape(blur_img.shape) * 255
-img_recolored = img_recolored.astype(np.uint8)
+coded_image = coded_image.reshape(blur_img.shape[:-1])
+img_recolored = coded_image.astype(np.uint8)
 
 #Divide channels to do vvalue, smoothen y neighbors
 print('Smoothing image...')
-'''
-R= img_recolored[:, :, 0]
-G= img_recolored[:, :, 1]
-B= img_recolored[:, :, 2]
-
-Rsmooth = smoothen_channel(R).astype(np.uint8)
-Gsmooth = smoothen_channel(G).astype(np.uint8)
-Bsmooth = smoothen_channel(B).astype(np.uint8)
-
-Rsmooth = smoothen_channel(Rsmooth).astype(np.uint8)
-Gsmooth = smoothen_channel(Gsmooth).astype(np.uint8)
-Bsmooth = smoothen_channel(Bsmooth).astype(np.uint8)
-
-smoothed_img = cv2.merge((Rsmooth, Gsmooth, Bsmooth))
-'''
-
 smoothed_img = smoothen(img_recolored, smoothen_ratio)
 smoothed_img = smoothen(smoothed_img, smoothen_ratio)
 
@@ -157,13 +100,14 @@ smoothed_img = smoothen(smoothed_img, smoothen_ratio)
 print('getting contours...')
 edges = get_outlines(smoothed_img)
 
-cv2.imwrite('smoothed.jpg', smoothed_img)
-cv2.imwrite('edges.jpg', edges)
+final_coloured_image = kmeans.cluster_centers_[smoothed_img].reshape(img.shape) #backproject to the color centers
 
-cv2.imshow("smoothed", cv2.imread('smoothed.jpg'))
-cv2.imshow("edges", cv2.imread('edges.jpg'))
+
+cv2.imwrite('edges.png', edges)
+cv2.imwrite('final.png', final_coloured_image)
+
+cv2.imshow("smoothed",final_coloured_image)
+cv2.imshow("edges", cv2.imread('edges.png'))
 
 plt.show()
 cv2.waitKey(0)
-
-cv2.imwrite('final.jpg', smoothed_img)
