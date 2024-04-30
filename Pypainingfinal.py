@@ -11,7 +11,7 @@ smoothen_ratio = 4
 ####funciones
 
 def vvalue (mat, x, y, xyrange):
-    ymax, xmax = mat.shape
+    ymax, xmax = mat.shape[:2]
     modas = mat[max(y - xyrange, 0):min(y + xyrange, ymax),
                 max(x - xyrange, 0):min(x + xyrange, xmax)].flatten()
     modas = modas.astype(int) 
@@ -20,15 +20,15 @@ def vvalue (mat, x, y, xyrange):
     return np.argmax(counts)
 
 
-def smoothen(mat, filter_size=16):
-    ymax, xmax = mat.shape
+def smoothen(mat, filter_size):
+    ymax, xmax = mat.shape[:2]
     flat_mat = np.array([
         vvalue(mat, x, y, filter_size)
         for y in range(0, ymax)
         for x in range(0, xmax)
     ])
 
-    return flat_mat.reshape(mat.shape)
+    return flat_mat.reshape(mat.shape[:2])
 
 
 def neighbors(mat, x, y):
@@ -55,7 +55,7 @@ def smoothen_channel(channel):
 
 
 def get_outlines(mat):
-    ymax, xmax, _ = mat.shape
+    ymax, xmax = mat.shape
 
     outlines = np.array([
         255 if neighbors(mat, x, y) else 0
@@ -134,6 +134,7 @@ img_recolored = img_recolored.astype(np.uint8)
 
 #Divide channels to do vvalue, smoothen y neighbors
 print('Smoothing image...')
+'''
 R= img_recolored[:, :, 0]
 G= img_recolored[:, :, 1]
 B= img_recolored[:, :, 2]
@@ -147,14 +148,19 @@ Gsmooth = smoothen_channel(Gsmooth).astype(np.uint8)
 Bsmooth = smoothen_channel(Bsmooth).astype(np.uint8)
 
 smoothed_img = cv2.merge((Rsmooth, Gsmooth, Bsmooth))
+'''
+
+smoothed_img = smoothen(img_recolored, smoothen_ratio)
+smoothed_img = smoothen(smoothed_img, smoothen_ratio)
 
 #Get contours
 print('getting contours...')
 edges = get_outlines(smoothed_img)
 
+cv2.imwrite('smoothed.jpg', smoothed_img)
 cv2.imwrite('edges.jpg', edges)
 
-cv2.imshow("smoothed", smoothed_img)
+cv2.imshow("smoothed", cv2.imread('smoothed.jpg'))
 cv2.imshow("edges", cv2.imread('edges.jpg'))
 
 plt.show()
