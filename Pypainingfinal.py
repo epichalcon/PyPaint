@@ -5,7 +5,7 @@ from sklearn.cluster import KMeans
 
 n_colors = 20
 foto = 'rome.jpg'
-resizing = 0.5
+resizing = 1
 smoothen_ratio = 4
 
 ####funciones
@@ -102,12 +102,17 @@ edges = get_outlines(smoothed_img)
 
 final_coloured_image = kmeans.cluster_centers_[smoothed_img].reshape(img.shape) #backproject to the color centers
 
+print(smoothed_img.shape)
+print(edges.shape)
+
+with open('temp.txt', 'w') as f:
+    f.write(f"{list(smoothed_img.flatten())}\n{list(edges.flatten())}")
+
 
 cv2.imwrite('edges.png', edges)
 cv2.imwrite('final.png', final_coloured_image)
 
-cv2.imshow("smoothed",final_coloured_image)
+cv2.imshow("smoothed",cv2.imread('final.png'))
 cv2.imshow("edges", cv2.imread('edges.png'))
 
-plt.show()
 cv2.waitKey(0)
