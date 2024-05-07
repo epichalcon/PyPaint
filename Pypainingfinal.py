@@ -1,6 +1,5 @@
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 
 n_colors = 20
@@ -20,7 +19,7 @@ def vvalue (mat, x, y, xyrange):
     return np.argmax(counts)
 
 
-def smoothen(mat, filter_size=16):
+def smoothen(mat, filter_size):
     ymax, xmax = mat.shape
     flat_mat = np.array([
         vvalue(mat, x, y, filter_size)
@@ -55,7 +54,7 @@ def smoothen_channel(channel):
 
 
 def get_outlines(mat):
-    ymax, xmax, _ = mat.shape
+    ymax, xmax = mat.shape
 
     outlines = np.array([
         255 if neighbors(mat, x, y) else 0
@@ -76,30 +75,14 @@ img = cv2.resize(img,None, fx = resizing, fy= resizing)
 print('Bluring image...')
 blur_img = cv2.GaussianBlur(img,(3,3),0)
 
-''''
-#Visualizar imagenes:
-fig, axs = plt.subplots(1,2, figsize=(20,5))
-axs[0].imshow(img)
-axs[0].set_title('Original Image')
-axs[0].axis('off')
-
-axs[1].imshow(blur_img)
-axs[1].set_title('Blurred Image')
-axs[1].axis('off')
-
-plt.show()
-cv2.waitKey(0)
-''''
-
 #Normalizing:
-data=blur_img/255.0
-data=data.reshape(-1,3)
+data=blur_img.reshape(-1,3)
 
 #K-means
 print('Quantizising image...')
 kmeans = KMeans(n_colors)
 kmeans.fit(data)
-y_est = kmeans.predict(data) #cluster center 
+coded_image = kmeans.predict(data) #cluster center 
 new_colors=kmeans.cluster_centers_[kmeans.labels_] #backproject to the color centers
 
 
@@ -129,31 +112,31 @@ cv2.waitKey(0)
 '''
 
 #Recolored image with Kmeans
-img_recolored = new_colors.reshape(blur_img.shape) * 255
-img_recolored = img_recolored.astype(np.uint8)
+coded_image = coded_image.reshape(blur_img.shape[:-1])
+img_recolored = coded_image.astype(np.uint8)
 
 #Divide channels to do vvalue, smoothen y neighbors
 print('Smoothing image...')
-R= img_recolored[:, :, 0]
-G= img_recolored[:, :, 1]
-B= img_recolored[:, :, 2]
-
-Rsmooth = smoothen_channel(R).astype(np.uint8)
-Gsmooth = smoothen_channel(G).astype(np.uint8)
-Bsmooth = smoothen_channel(B).astype(np.uint8)
-
-smoothed_img = cv2.merge((Rsmooth, Gsmooth, Bsmooth))
+smoothed_img = smoothen(img_recolored, smoothen_ratio)
+smoothed_img = smoothen(smoothed_img, smoothen_ratio)
 
 #Get contours
 print('getting contours...')
 edges = get_outlines(smoothed_img)
 
-cv2.imwrite('edges.jpg', edges)
+final_coloured_image = kmeans.cluster_centers_[smoothed_img].reshape(img.shape) #backproject to the color centers
 
-cv2.imshow("smoothed", smoothed_img)
-cv2.imshow("edges", cv2.imread('edges.jpg'))
+print(smoothed_img.shape)
+print(edges.shape)
 
-plt.show()
+with open('temp.txt', 'w') as f:
+    f.write(f"{list(smoothed_img.flatten())}\n{list(edges.flatten())}")
+
+
+cv2.imwrite('edges.png', edges)
+cv2.imwrite('final.png', final_coloured_image)
+
+cv2.imshow("smoothed",cv2.imread('final.png'))
+cv2.imshow("edges", cv2.imread('edges.png'))
+
 cv2.waitKey(0)
-
-cv2.imwrite('final.jpg', smoothed_img)
