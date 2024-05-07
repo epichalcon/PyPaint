@@ -5,7 +5,7 @@ from sklearn.cluster import KMeans
 
 n_colors = 20
 foto = 'rome.jpg'
-resizing = 1
+resizing = 0.5
 smoothen_ratio = 4
 
 ####funciones
@@ -76,7 +76,7 @@ img = cv2.resize(img,None, fx = resizing, fy= resizing)
 print('Bluring image...')
 blur_img = cv2.GaussianBlur(img,(3,3),0)
 
-'''
+''''
 #Visualizar imagenes:
 fig, axs = plt.subplots(1,2, figsize=(20,5))
 axs[0].imshow(img)
@@ -89,7 +89,7 @@ axs[1].axis('off')
 
 plt.show()
 cv2.waitKey(0)
-'''
+''''
 
 #Normalizing:
 data=blur_img/255.0
@@ -102,8 +102,8 @@ kmeans.fit(data)
 y_est = kmeans.predict(data) #cluster center 
 new_colors=kmeans.cluster_centers_[kmeans.labels_] #backproject to the color centers
 
-'''
 
+'''''
 #3D point cloud
 fig= plt.figure(figsize=(10,7))
 ax= fig.add_subplot(projection='3d')
