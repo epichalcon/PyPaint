@@ -6,42 +6,38 @@ original_edges = cv2.imread("edges.png")
 print(original_edges.shape)
 
 def find_current_contour(mat, x, y):
-    current_contour = set()
+    current_contour = []
     directions = [(-1, 0),
                   (1, 0),
                   (0, -1),
                   (0, 1),
                   ]
 
-    original = (x, y)
-
     queue = [(x,y)]
-
+    original = (x, y)
     cx, cy = 0,0
 
 
-    while len(queue) != 0:
+    while (queue):
         x, y = queue.pop(0)
-        if not( 0 <= x < len(mat) and 0 <= y < len(mat[0])) or mat[x,y] == 0: # es un borde
+        if not( 0 <= x < mat.shape[0] and 0 <= y < mat.shape[1]) or mat[x,y] == 0: # es un borde
             continue
 
-        current_contour.add((x,y))
+        current_contour.append((x,y))
         mat[x, y] = 0
-        cx += x
-        cy += y
+        queue.extend((x+dx, y +dy) for dx, dy in directions if 0<= x +dx < mat.shape[0] and 0 <= y +dy < mat.shape[1])
+        #return np.array(current_contour, dtype=np.int32)
 
-        new_coords = [(x + nx,y+ny) for nx, ny in directions]
-        #if 0<= x +dx <mat.shape[0] and 0 <= y+dy < mat.shape[1]]
-        queue.extend(new_coords)
-
+        
     if len(current_contour) < 15:
-        return -1, -1
+        return np.array([])
+    return np.array(current_contour, dtype=np.int32)
 
-    if (cx, cy) not in current_contour:
-        return cx // len(current_contour), cy // len(current_contour)
+    #if (cx, cy) not in current_contour:
+     #   return cx // len(current_contour), cy // len(current_contour)
 
-    else:
-        return original   
+    #else:
+     #   return original   
 
 def load_image():
     with open('temp.txt', 'r') as f:
@@ -69,27 +65,24 @@ image, edges = load_image()
 visited = set()
 resulting_numbers = {} # diccionario con una coordenada como clave y el color como valor
 
-
+contours= []
 print('Calculating centroids...')
 for x, row in enumerate(edges):
     for y, color in enumerate(row):
-        
-        if color == 0:
-            continue
-
-        cx, cy = find_current_contour(edges, x, y)
-
-        if (cx, cy) == (-1, -1):
-            continue
-        resulting_numbers[(cy,cx)] = image[cx, cy]
-
-area= cv2.contourArea(resulting_numbers)
-if area<100:
-    font_scale =0.2
-elif area<500:
-    font_scale = 0.5
-else:
-    area= 1.0
+        if color != 0:
+            contour = find_current_contour(edges, x, y)
+            if len(contour) >= 15:
+                contours.append(contour)
+                resulting_numbers [tuple(np.mean(contour, axis=0, dtype= int))] = image[x,y]
+  
+for contour in contours:
+    area= cv2.contourArea(contour)
+    if area<100:
+        font_scale =0.2
+    elif area<500:
+        font_scale = 0.5
+    else:
+        area= 1.0
 
 print('Drawing numbers...')
 for point, number in resulting_numbers.items():
