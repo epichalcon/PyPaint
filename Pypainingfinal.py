@@ -81,8 +81,7 @@ data=blur_img.reshape(-1,3)
 #K-means
 print('Quantizising image...')
 kmeans = KMeans(n_colors)
-kmeans.fit(data)
-coded_image = kmeans.predict(data) #cluster center 
+coded_image = kmeans.fit_predict(data) #cluster center 
 new_colors=kmeans.cluster_centers_[kmeans.labels_] #backproject to the color centers
 
 
