@@ -59,6 +59,15 @@ def load_demo():
             ])
     return image, edges
 
+def get_font_scale(contour):
+    area= len(contour)
+    if area<40:
+        return 0.4
+    elif area<250:
+        return 0.7
+    else:
+        return 1.0
+
 image, edges = load_image()
     
 
@@ -73,21 +82,15 @@ for x, row in enumerate(edges):
             contour = find_current_contour(edges, x, y)
             if len(contour) >= 15:
                 contours.append(contour)
-                resulting_numbers [tuple(np.mean(contour, axis=0, dtype= int))] = image[x,y]
-  
-for contour in contours:
-    area= cv2.contourArea(contour)
-    if area<100:
-        font_scale =0.2
-    elif area<500:
-        font_scale = 0.5
-    else:
-        area= 1.0
+                
+                resulting_numbers [tuple(np.mean(contour, axis=0, dtype= int))] = (image[x,y], get_font_scale(contour))
+
 
 print('Drawing numbers...')
-for point, number in resulting_numbers.items():
+for point, (number, scale) in resulting_numbers.items():
     px, py = point
-    cv2.putText(original_edges, str(number), (px - 3, py + 3), cv2.FONT_HERSHEY_PLAIN, font_scale, (0, 0, 255))
+    
+    cv2.putText(original_edges, str(number), (py - 3, px + 3), cv2.FONT_HERSHEY_PLAIN, scale, (0, 0, 255))
 
 cv2.imwrite('numbers.png', original_edges)
 
