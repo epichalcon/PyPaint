@@ -83,18 +83,11 @@ for x, row in enumerate(edges):
             continue
         resulting_numbers[(cy,cx)] = image[cx, cy]
 
-area= cv2.contourArea(resulting_numbers)
-if area<100:
-    font_scale =0.2
-elif area<500:
-    font_scale = 0.5
-else:
-    area= 1.0
 
 print('Drawing numbers...')
 for point, number in resulting_numbers.items():
     px, py = point
-    cv2.putText(original_edges, str(number), (px - 3, py + 3), cv2.FONT_HERSHEY_PLAIN, font_scale, (0, 0, 255))
+    cv2.putText(original_edges, str(number), (px - 3, py + 3), cv2.FONT_HERSHEY_PLAIN, .7, (0, 0, 255))
 
 cv2.imwrite('numbers.png', original_edges)
 
