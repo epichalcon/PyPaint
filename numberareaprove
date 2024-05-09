@@ -5,8 +5,40 @@ original_edges = cv2.imread("edges.png")
 
 print(original_edges.shape)
 
-def find_current_contour(mat, x, y):
-    current_contour = []
+class Contour:
+    coords: set
+    leftmost = float('inf')
+    rightmost = 0
+    upmost = float('inf')
+    downmost = 0
+    color = None
+    size = 0
+
+    def __init__(self, color):
+        self.color = color
+        self.coords = set()
+
+    def add_cord(self, px, py):
+        self.coords.add((px, py))
+
+        self.rightmost = max(self.rightmost, px)
+        self.downmost = max(self.downmost, py)
+        self.leftmost = min(self.leftmost, px)
+        self.upmost = min(self.upmost, py)
+
+        self.size += 1
+        assert self.size == len(self.coords)
+
+    def get_center(self):
+        return tuple (np.mean(list(self.coords), axis=0, dtype=int))
+    
+    def __len__(self):
+        return self.size
+
+        
+
+def find_current_contour(mat, image, x, y) -> Contour:
+    current_contour = Contour(image[x,y])
     directions = [(-1, 0),
                   (1, 0),
                   (0, -1),
@@ -23,25 +55,23 @@ def find_current_contour(mat, x, y):
         if not( 0 <= x < mat.shape[0] and 0 <= y < mat.shape[1]) or mat[x,y] == 0: # es un borde
             continue
 
-        current_contour.append((x,y))
+        current_contour.add_cord(x,y)
         mat[x, y] = 0
         queue.extend((x+dx, y +dy) for dx, dy in directions if 0<= x +dx < mat.shape[0] and 0 <= y +dy < mat.shape[1])
         #return np.array(current_contour, dtype=np.int32)
 
         
-    if len(current_contour) < 15:
+    if current_contour.size < 15:
         return np.array([])
-    return np.array(current_contour, dtype=np.int32)
+    return current_contour
 
 def reposition_number(cx, cy, contour, font_scale, text):
-    is_inside = cv2.pointPolygonTest(contour,(cx,cy), False)
 
-    if is_inside >= 0:
+    if (cx, cy) in contour.coords:
         return cx,cy
     else:
-        x,y,w,h = cv2.boundingRect(contour)
         text_size = cv2.getTextSize(text, cv2.FONT_HERSHEY_PLAIN, font_scale, 1)[0]
-        new_cx = x- text_size[0]-3
+        new_cx = contour.leftmost + 3
         new_cy = cy
         return new_cx, new_cy
 
@@ -73,9 +103,10 @@ def load_demo():
 
 def get_font_scale(contour):
     area= len(contour)
+    #area= len(contour)/4
     if area<40:
         return 0.4
-    elif area<250:
+    elif area<250: 
         return 0.7
     else:
         return 1.0
@@ -91,12 +122,12 @@ print('Calculating centroids...')
 for x, row in enumerate(edges):
     for y, color in enumerate(row):
         if color != 0:
-            contour = find_current_contour(edges, x, y)
-            if len(contour) >= 15:
+            contour = find_current_contour(edges, image, x, y)
+            if contour.size >= 15:
                 contours.append(contour)
-                cx,cy = tuple (np.mean(contour, axis=0, dtype=int))
                 number =image[x,y]
                 font_scale = get_font_scale(contour)
+                cx, cy = contour.get_center()
                 new_cx, new_cy= reposition_number(cx,cy,contour, font_scale, str(number))
                 resulting_numbers [(new_cx,new_cy)] = (number, font_scale)
 

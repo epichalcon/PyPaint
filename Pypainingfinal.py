@@ -2,9 +2,9 @@ import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
-n_colors = 20
-foto = 'rome.jpg'
-resizing = 0.5
+n_colors = 10
+foto = 'dancing.jpg'
+resizing = 1
 smoothen_ratio = 4
 
 ####funciones
