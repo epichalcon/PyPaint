@@ -83,19 +83,22 @@ def reposition_number(cx, cy, contour: Contour, font_scale, text):
         new_cy= leftmost_y
         contour.num_color = (255, 0, 0)
         
+        
 
         if (new_cx, new_cy) in contour.coords:
             contour.num_color =(0,0,255)
             return new_cx,new_cy
         else:
-            #leftmost_x = contour.leftmost
-            #new_cy = cy
-            #leftmost_y_candidates = [y for x, y in contour.coords if x == leftmost_x]
-            #leftmost_y = min(leftmost_y_candidates) if leftmost_y_candidates else cy
-            #new_cx = leftmost_x +10
-            #new_cy= leftmost_y
+            #upmost_y = contour.upmost
+            #new_cx = new_cx
+            #upmost_x_candidates = [x for y, x in contour.coords if y == upmost_y]
+            #upmost_x = min(upmost_x_candidates) if upmost_x_candidates else new_cx
+            #new_cy = upmost_y
+            #new_cx= upmost_x
             contour.num_color = (255, 0, 0)
-        return new_cx, new_cy
+    return new_cx, new_cy   
+        
+        
         
 
 def load_image():
