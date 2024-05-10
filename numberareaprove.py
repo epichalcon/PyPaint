@@ -7,16 +7,23 @@ print(original_edges.shape)
 
 class Contour:
     coords: set
-    leftmost = float('inf')
-    rightmost = 0
-    upmost = float('inf')
-    downmost = 0
-    color = None
-    size = 0
+    leftmost:float 
+    rightmost: int
+    upmost: float 
+    downmost: int
+    color: int
+    num_color: tuple 
+    size: int
 
     def __init__(self, color):
         self.color = color
         self.coords = set()
+        self.leftmost = float('inf')
+        self.rightmost = 0
+        self.upmost = float('inf')
+        self.downmost = 0
+        self.size = 0
+        self.num_color = (0,0,225)
 
     def add_cord(self, px, py):
         self.coords.add((px, py))
@@ -46,8 +53,6 @@ def find_current_contour(mat, image, x, y) -> Contour:
                   ]
 
     queue = [(x,y)]
-    original = (x, y)
-    cx, cy = 0,0
 
 
     while (queue):
@@ -61,25 +66,19 @@ def find_current_contour(mat, image, x, y) -> Contour:
         #return np.array(current_contour, dtype=np.int32)
 
         
-    if current_contour.size < 15:
-        return np.array([])
+    if current_contour.size < 50:
+        return current_contour
     return current_contour
 
-def reposition_number(cx, cy, contour, font_scale, text):
+def reposition_number(cx, cy, contour: Contour, font_scale, text):
 
     if (cx, cy) in contour.coords:
         return cx,cy
     else:
-        text_size = cv2.getTextSize(text, cv2.FONT_HERSHEY_PLAIN, font_scale, 1)[0]
         new_cx = contour.leftmost + 3
         new_cy = cy
+        contour.num_color = (255, 0, 0)
         return new_cx, new_cy
-
-    #if (cx, cy) not in current_contour:
-     #   return cx // len(current_contour), cy // len(current_contour)
-
-    #else:
-     #   return original   
 
 def load_image():
     with open('temp.txt', 'r') as f:
@@ -129,13 +128,13 @@ for x, row in enumerate(edges):
                 font_scale = get_font_scale(contour)
                 cx, cy = contour.get_center()
                 new_cx, new_cy= reposition_number(cx,cy,contour, font_scale, str(number))
-                resulting_numbers [(new_cx,new_cy)] = (number, font_scale)
+                resulting_numbers [(new_cx,new_cy)] = (number, font_scale, contour.num_color)
 
 
 print('Drawing numbers...')
-for point, (number, scale) in resulting_numbers.items():
+for point, (number, scale, num_color) in resulting_numbers.items():
     px, py = point  
-    cv2.putText(original_edges, str(number), (py - 3, px + 3), cv2.FONT_HERSHEY_PLAIN, scale, (0, 0, 255))
+    cv2.putText(original_edges, str(number), (py - 3, px + 3), cv2.FONT_HERSHEY_PLAIN, scale, num_color)
 
 cv2.imwrite('numbers.png', original_edges)
 

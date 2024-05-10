@@ -4,7 +4,7 @@ from sklearn.cluster import KMeans
 
 n_colors = 10
 foto = 'dancing.jpg'
-resizing = 1
+resizing = 1.5
 smoothen_ratio = 4
 
 ####funciones
