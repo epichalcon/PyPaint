@@ -1,3 +1,5 @@
 /env/*
 pyrightconfig.json
-
+*.jpg
+*.png
+temp.txt
