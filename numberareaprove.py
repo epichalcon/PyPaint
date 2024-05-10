@@ -75,10 +75,28 @@ def reposition_number(cx, cy, contour: Contour, font_scale, text):
     if (cx, cy) in contour.coords:
         return cx,cy
     else:
-        new_cx = contour.leftmost + 3
-        new_cy = cy
+        leftmost_x = contour.leftmost
+        #new_cy = cy
+        leftmost_y_candidates = [y for x, y in contour.coords if x == leftmost_x]
+        leftmost_y = min(leftmost_y_candidates) if leftmost_y_candidates else cy
+        new_cx = leftmost_x +10
+        new_cy= leftmost_y
         contour.num_color = (255, 0, 0)
+        
+
+        if (new_cx, new_cy) in contour.coords:
+            contour.num_color =(0,0,255)
+            return new_cx,new_cy
+        else:
+            #leftmost_x = contour.leftmost
+            #new_cy = cy
+            #leftmost_y_candidates = [y for x, y in contour.coords if x == leftmost_x]
+            #leftmost_y = min(leftmost_y_candidates) if leftmost_y_candidates else cy
+            #new_cx = leftmost_x +10
+            #new_cy= leftmost_y
+            contour.num_color = (255, 0, 0)
         return new_cx, new_cy
+        
 
 def load_image():
     with open('temp.txt', 'r') as f:
