@@ -2,12 +2,12 @@ import cv2
 import numpy as np
 from sklearn.cluster import KMeans
 
-n_colors = 10
-foto = 'rome.jpg'
-resizing = 0.5
-smoothen_ratio = 4
+import number_area_assignation
 
-####funciones
+n_colors = 10
+foto = 'imgs/rome.jpg'
+resizing = .5
+smoothen_ratio = 4
 
 def vvalue (mat, x, y, xyrange):
     ymax, xmax = mat.shape
@@ -64,78 +64,60 @@ def get_outlines(mat):
 
     return outlines.reshape((ymax, xmax))
 
-###
+def load_image():
+    img = cv2.imread(foto)
+    img = cv2.resize(img,None, fx = resizing, fy= resizing)
+    blur_img = cv2.GaussianBlur(img,(3,3),0)
 
-#load and resize
-print('Loading image...')
-img = cv2.imread(foto)
-img = cv2.resize(img,None, fx = resizing, fy= resizing)
+    return blur_img
 
-#disminuir ruido
-print('Bluring image...')
-blur_img = cv2.GaussianBlur(img,(3,3),0)
+def get_kmeans(image):
+    #Normalizing:
+    data=image.reshape(-1,3)
 
-#Normalizing:
-data=blur_img.reshape(-1,3)
+    #K-means
+    kmeans = KMeans(n_colors)
+    coded_image = kmeans.fit_predict(data) #cluster center 
 
-#K-means
-print('Quantizising image...')
-kmeans = KMeans(n_colors)
-coded_image = kmeans.fit_predict(data) #cluster center 
-new_colors=kmeans.cluster_centers_[kmeans.labels_] #backproject to the color centers
+    coded_image = coded_image.reshape(image.shape[:-1])
+    coded_image = coded_image.astype(np.uint8)
 
+    return kmeans.cluster_centers_, coded_image 
 
-'''''
-#3D point cloud
-fig= plt.figure(figsize=(10,7))
-ax= fig.add_subplot(projection='3d')
-data_sampled=data[::50] #1 punto cada 50 (velocidad)
-ax.scatter(data_sampled[:,0], data_sampled[:,1],data_sampled[:,2], marker='.', color=data_sampled)
-ax.set_title('3D Point Cloud of Original Data')
-ax.set_xlabel('R')
-ax.set_ylabel('G')
-_=ax.set_zlabel('B')
+def smoothen_image(image, smoothen_ratio):
+    #Divide channels to do vvalue, smoothen y neighbors
+    smoothed_img = smoothen(image, smoothen_ratio)
+    smoothed_img = smoothen(smoothed_img, smoothen_ratio)
 
-# 3d después de Kmeans
-fig = plt.figure(figsize=(10,7))
-ax = fig.add_subplot(projection = '3d')
-data_sampled = new_colors[::50]
-ax.scatter(data_sampled[:,0], data_sampled[:,1],data_sampled[:,2], marker='.', color= data_sampled, s=200)
-ax.set_title('3D Point Cloud of Kmeans Data')
-ax.set_xlabel('R')
-ax.set_ylabel('G')
-_=ax.set_zlabel('B')
-
-plt.show()
-cv2.waitKey(0)
-'''
-
-#Recolored image with Kmeans
-coded_image = coded_image.reshape(blur_img.shape[:-1])
-img_recolored = coded_image.astype(np.uint8)
-
-#Divide channels to do vvalue, smoothen y neighbors
-print('Smoothing image...')
-smoothed_img = smoothen(img_recolored, smoothen_ratio)
-smoothed_img = smoothen(smoothed_img, smoothen_ratio)
-
-#Get contours
-print('getting contours...')
-edges = get_outlines(smoothed_img)
-
-final_coloured_image = kmeans.cluster_centers_[smoothed_img].reshape(img.shape) #backproject to the color centers
-
-print(smoothed_img.shape)
-print(edges.shape)
-
-with open('temp.txt', 'w') as f:
-    f.write(f"{list(smoothed_img.flatten())}\n{list(edges.flatten())}")
+    return smoothed_img 
 
 
-cv2.imwrite('edges.png', edges)
-cv2.imwrite('final.png', final_coloured_image)
+if __name__ == "__main__":
+    print('Loading image...')
+    image = load_image()
+    print('Quantizising image...')
+    centers, km_image = get_kmeans(image)
+    print('Smoothing image...')
+    smoothed_img = smoothen_image(km_image, smoothen_ratio)
+    print('getting contours...')
+    edges = get_outlines(smoothed_img)
+    
+    final_coloured_image = centers[smoothed_img].reshape(image.shape) #backproject to the color centers
 
-cv2.imshow("smoothed",cv2.imread('final.png'))
-cv2.imshow("edges", cv2.imread('edges.png'))
+    cv2.imwrite('results/edges.png', edges)
+    cv2.imwrite('results/final.png', final_coloured_image)
 
-cv2.waitKey(0)
+    print('Calculating centroids...')
+    numbers = number_area_assignation.get_centroids(smoothed_img, edges.copy())
+
+    print('Drawing numbers...')
+    new_edges = img_gray = cv2.cvtColor(np.ascontiguousarray(edges, dtype=np.uint8), cv2.COLOR_GRAY2RGB)
+    number_area_assignation.draw_numbers(new_edges,numbers)
+
+    cv2.imwrite('results/numbers.png', new_edges)
+
+    cv2.imshow("smoothed",cv2.imread('results/final.png'))
+    cv2.imshow("edges", cv2.imread('results/edges.png'))
+    cv2.imshow("numbers", new_edges)
+
+    cv2.waitKey(0)

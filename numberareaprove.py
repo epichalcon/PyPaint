@@ -3,8 +3,6 @@ import cv2
 
 original_edges = cv2.imread("edges.png")
 
-print(original_edges.shape)
-
 class Contour:
     coords: set
     leftmost:float 
@@ -70,32 +68,24 @@ def find_current_contour(mat, image, x, y) -> Contour:
         return current_contour
     return current_contour
 
-def reposition_number(cx, cy, contour: Contour, font_scale, text):
+def reposition_number(cx, cy, contour: Contour):
 
     if (cx, cy) in contour.coords:
         return cx,cy
     else:
         leftmost_x = contour.leftmost
-        #new_cy = cy
         leftmost_y_candidates = [y for x, y in contour.coords if x == leftmost_x]
         leftmost_y = min(leftmost_y_candidates) if leftmost_y_candidates else cy
-        new_cx = leftmost_x +10
+        new_cx = leftmost_x + 10
         new_cy= leftmost_y
         contour.num_color = (255, 0, 0)
         
         
 
-        if (new_cx, new_cy) in contour.coords:
-            contour.num_color =(0,0,255)
-            return new_cx,new_cy
-        else:
-            #upmost_y = contour.upmost
-            #new_cx = new_cx
-            #upmost_x_candidates = [x for y, x in contour.coords if y == upmost_y]
-            #upmost_x = min(upmost_x_candidates) if upmost_x_candidates else new_cx
-            #new_cy = upmost_y
-            #new_cx= upmost_x
-            contour.num_color = (255, 0, 0)
+    while (new_cx, new_cy) not in contour.coords:
+        new_cx = new_cx - 2
+
+    contour.num_color =(0,0,255)
     return new_cx, new_cy   
         
         
@@ -148,7 +138,7 @@ for x, row in enumerate(edges):
                 number =image[x,y]
                 font_scale = get_font_scale(contour)
                 cx, cy = contour.get_center()
-                new_cx, new_cy= reposition_number(cx,cy,contour, font_scale, str(number))
+                new_cx, new_cy= reposition_number(cx,cy,contour)
                 resulting_numbers [(new_cx,new_cy)] = (number, font_scale, contour.num_color)
 
 
