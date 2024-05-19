@@ -1,0 +1,35 @@
+#content {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+#container {
+    display: flex;
+    height: 50vw;
+    width: 50vw;
+    border: 2px solid black;
+    flex-direction: column;
+}
+
+#new-grid {
+    width: 100px;
+    height: 50px;
+}
+
+.row{
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+}
+
+.col{
+    /*background: peachpuff;*/
+    border: 1px solid gray;
+    flex: 1;
+}
+
+.colored {
+    background-color: black;
+}
