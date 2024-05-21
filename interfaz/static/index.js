@@ -1,6 +1,7 @@
 function uploadImage() {
     const file = document.getElementById('image').files[0];
     const formData = new FormData();
+    console.log(file)
     formData.append('image', file);
 
     fetch('http://localhost:5000/upload', {

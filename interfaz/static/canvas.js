@@ -1,26 +1,42 @@
+var container 
+var newGridButton 
 
-const container = document.querySelector("#container");
-const newGridButton = document.querySelector("#new-grid")
+var centerX
+var centerY
 
-function displayGrid(dimentions){
-    for (let i = 0; i < dimentions; i++){
-        const gridRow = document.createElement('div');
-        gridRow.setAttribute("id", i);
-        gridRow.classList.add('row')
-        container.appendChild(gridRow);
+var image
 
-        for (let j = 0; j < dimentions; j++){
-            const gridCol = document.createElement('div');
-            gridCol.setAttribute("id", i + "_" + j);
-            gridCol.classList.add('col')
-            gridRow.appendChild(gridCol);
-        }
-    }
+var blockSize = 3
+
+window.onload = function() {
+    container = document.querySelector("#container"); 
+    //newGridButton = document.querySelector("#new-grid")
+}
 
 
-    document.querySelectorAll(".col").forEach((cell) => {
-        cell.addEventListener('mouseover', () => {
-            cell.classList.add('colored');
-        })
-    })
+fetch('http://localhost:5000/process', {
+    method: 'GET',
+})
+.then(response => response.json())
+.then(data => {
+    displayGrid(data.image)
+})
+.catch(error => {
+    console.error(error);
+});
+
+
+function displayGrid(imageBase64){
+    context = container.getContext("2d")
+    const img = new Image();
+
+    img.src = 'data:image/png;base64,' + imageBase64;
+
+    img.onload = function() {
+        container.width = img.width;
+        container.height = img.height;
+        context.drawImage(img, 0, 0);
+    };
+
+    console.log('finished')
 }

@@ -1,10 +1,15 @@
 from flask import Flask, render_template, request, jsonify
+from Pypainting import pypainting
 
 
 app = Flask(__name__)
 
+image_name : str | None
+
 @app.route('/upload', methods=['POST'])
 def upload_image():
+    global image_name
+    print(request.files)
     if 'image' not in request.files:
         return jsonify({'error': 'No se ha subido ninguna imagen'}), 400
 
@@ -12,10 +17,21 @@ def upload_image():
 
     # Guardar la imagen en el servidor
     image_name = image_file.filename
-    image_file.save('./static/images/image.jpg')
+    image_file.save(f'./static/images/{image_name}')
 
+    print(image_name)
+    
     # Enviar una respuesta JSON con el nombre de la imagen
     return jsonify({'message': f'Imagen subida correctamente: {image_name}'})
+
+
+
+
+@app.route('/process', methods=['GET'])
+def get_processed_images():
+    global image_name
+    edges = pypainting.main(image_name)
+    return jsonify({'image': edges})
 
 @app.route('/')
 def index():

@@ -1,11 +1,13 @@
 import cv2
 import numpy as np
 from sklearn.cluster import KMeans
+from .number_area_assignation import get_centroids, draw_numbers
+import base64
+from io import BytesIO
+from PIL import Image
 
-import number_area_assignation
 
 n_colors = 10
-foto = 'imgs/rome.jpg'
 resizing = .5
 smoothen_ratio = 4
 
@@ -64,8 +66,11 @@ def get_outlines(mat):
 
     return outlines.reshape((ymax, xmax))
 
-def load_image():
+def load_image(foto_name):
+    foto = f'./static/images/{foto_name}'
     img = cv2.imread(foto)
+    if (img is None):
+        raise Exception("no image loaded")
     img = cv2.resize(img,None, fx = resizing, fy= resizing)
     blur_img = cv2.GaussianBlur(img,(3,3),0)
 
@@ -91,10 +96,10 @@ def smoothen_image(image, smoothen_ratio):
 
     return smoothed_img 
 
-
-if __name__ == "__main__":
+def main(foto_name):
+    result_directory = './static/images/results/'
     print('Loading image...')
-    image = load_image()
+    image = load_image(foto_name)
     print('Quantizising image...')
     centers, km_image = get_kmeans(image)
     print('Smoothing image...')
@@ -104,20 +109,31 @@ if __name__ == "__main__":
     
     final_coloured_image = centers[smoothed_img].reshape(image.shape) #backproject to the color centers
 
-    cv2.imwrite('results/edges.png', edges)
-    cv2.imwrite('results/final.png', final_coloured_image)
+
+    cv2.imwrite(f'{result_directory}edges.png', edges)
+    cv2.imwrite(f'{result_directory}final.png', final_coloured_image)
 
     print('Calculating centroids...')
-    numbers = number_area_assignation.get_centroids(smoothed_img, edges.copy())
+    numbers = get_centroids(smoothed_img, edges.copy())
 
     print('Drawing numbers...')
     new_edges = img_gray = cv2.cvtColor(np.ascontiguousarray(edges, dtype=np.uint8), cv2.COLOR_GRAY2RGB)
-    number_area_assignation.draw_numbers(new_edges,numbers)
+    draw_numbers(new_edges,numbers)
 
-    cv2.imwrite('results/numbers.png', new_edges)
+    cv2.imwrite(f'{result_directory}/numbers.png', new_edges)
 
+
+    '''
     cv2.imshow("smoothed",cv2.imread('results/final.png'))
     cv2.imshow("edges", cv2.imread('results/edges.png'))
     cv2.imshow("numbers", new_edges)
 
     cv2.waitKey(0)
+    '''
+
+    image = Image.open(f'{result_directory}/numbers.png')
+    buffered = BytesIO()
+    image.save(buffered, format="PNG")
+
+    # Encode the image to base64
+    return base64.b64encode(buffered.getvalue()).decode('utf-8')

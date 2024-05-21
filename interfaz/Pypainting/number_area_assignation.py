@@ -1,5 +1,5 @@
 import cv2
-from contours import Contour
+from .contours import Contour
 
 def find_current_contour(mat, image, x, y) -> Contour:
     current_contour = Contour(image[x,y])

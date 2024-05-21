@@ -1,3 +1,4 @@
+/*
 #content {
     display: flex;
     flex-direction: row;
@@ -25,11 +26,11 @@
 }
 
 .col{
-    /*background: peachpuff;*/
-    border: 1px solid gray;
+    background: peachpuff;
     flex: 1;
 }
 
 .colored {
     background-color: black;
 }
+*/
