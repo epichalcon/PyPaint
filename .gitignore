@@ -2,6 +2,6 @@
 pyrightconfig.json
 /results/*
 /__pycache__/*
-/interfaz/__pycache/*
+/interfaz/__pycache__/*
 /interfaz/static/images/results/*
 /interfaz/static/images/*.jpg
