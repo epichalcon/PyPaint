@@ -6,6 +6,8 @@ app = Flask(__name__)
 
 image_name : str | None
 
+regions = {}
+
 @app.route('/upload', methods=['POST'])
 def upload_image():
     global image_name
@@ -30,7 +32,8 @@ def upload_image():
 @app.route('/process', methods=['GET'])
 def get_processed_images():
     global image_name
-    edges = pypainting.main(image_name)
+    global regions 
+    edges, regions = pypainting.main(image_name)
     return jsonify({'image': edges})
 
 @app.route('/')
