@@ -1,7 +1,7 @@
 import cv2
 from .contours import Contour
 
-def find_current_contour(mat, image, x, y) -> Contour:
+def find_current_contour(mat, image, x, y, pixel_to_contour) -> Contour:
     current_contour = Contour(image[x,y])
     directions = [(-1, 0),
                   (1, 0),
@@ -16,6 +16,7 @@ def find_current_contour(mat, image, x, y) -> Contour:
             continue
 
         current_contour.add_cord(x,y)
+        pixel_to_contour[(x, y)] = current_contour
         mat[x, y] = 0
         queue.extend((x+dx, y +dy) for dx, dy in directions if 0<= x +dx < mat.shape[0] and 0 <= y +dy < mat.shape[1])
         
@@ -54,11 +55,13 @@ def get_font_scale(contour):
     
 def get_centroids(image, edges):
     resulting_numbers = {} # diccionario con una coordenada como clave y el color como valor
+    pixel_to_contour = {}
     contours= []
     for x, row in enumerate(edges):
         for y, color in enumerate(row):
             if color != 0:
-                contour = find_current_contour(edges, image, x, y)
+                contour = find_current_contour(edges, image, x, y, pixel_to_contour) # pixel_to_contour se modifica en la funcion añadiendo todos los pixeles que se incluyen
+                pixel_to_contour[(x,y)] = contour
                 if contour.size >= 15:
                     contours.append(contour)
                     number =image[x,y]
@@ -67,7 +70,7 @@ def get_centroids(image, edges):
                     new_cx, new_cy= reposition_number(cx,cy,contour)
                     resulting_numbers [(new_cx,new_cy)] = (number, font_scale)
 
-    return resulting_numbers
+    return resulting_numbers, pixel_to_contour
 
 def draw_numbers(edges, numbers):
     for point, (number, scale) in numbers.items():

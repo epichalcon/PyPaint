@@ -35,3 +35,9 @@ class Contour:
     
     def __len__(self):
         return self.size
+
+    def __str__(self) -> str:
+        return f'size: {self.size}, color: {self.color}'
+
+    def __repr__(self) -> str:
+        return f'size: {self.size}, color: {self.color}'

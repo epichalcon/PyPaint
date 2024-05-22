@@ -114,26 +114,20 @@ def main(foto_name):
     cv2.imwrite(f'{result_directory}final.png', final_coloured_image)
 
     print('Calculating centroids...')
-    numbers = get_centroids(smoothed_img, edges.copy())
+    numbers, pixel_to_contour = get_centroids(smoothed_img, edges.copy())
+
+    print(pixel_to_contour[(1,1)])
 
     print('Drawing numbers...')
-    new_edges = img_gray = cv2.cvtColor(np.ascontiguousarray(edges, dtype=np.uint8), cv2.COLOR_GRAY2RGB)
+    new_edges = cv2.cvtColor(np.ascontiguousarray(edges, dtype=np.uint8), cv2.COLOR_GRAY2RGB)
     draw_numbers(new_edges,numbers)
 
     cv2.imwrite(f'{result_directory}/numbers.png', new_edges)
 
-
-    '''
-    cv2.imshow("smoothed",cv2.imread('results/final.png'))
-    cv2.imshow("edges", cv2.imread('results/edges.png'))
-    cv2.imshow("numbers", new_edges)
-
-    cv2.waitKey(0)
-    '''
 
     image = Image.open(f'{result_directory}/numbers.png')
     buffered = BytesIO()
     image.save(buffered, format="PNG")
 
     # Encode the image to base64
-    return base64.b64encode(buffered.getvalue()).decode('utf-8')
+    return base64.b64encode(buffered.getvalue()).decode('utf-8'), pixel_to_contour, centers

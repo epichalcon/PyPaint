@@ -20,7 +20,28 @@ window.onload = function() {
 
         const ctx = canvas.getContext('2d');
 
-        manipulatePixels(ctx, container.width, container.height, x, y)
+        const pixelCoordinates = { x: x, y: y };
+
+        fetch('http://localhost:5000/region', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(pixelCoordinates)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Response from server:', data);
+
+            data.coordinates.forEach(pixel => {
+                manipulatePixels(ctx, container.width, container.height, pixel[1], pixel[0], data.color)
+            });
+
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+
     });
 }
 
@@ -47,7 +68,7 @@ function displayGrid(imageBase64){
         container.width = img.width;
         container.height = img.height;
         context.drawImage(img, 0, 0);
-        manipulatePixels(context, img.width, img.height, 0,0)
+        manipulatePixels(context, img.width, img.height, 0,0, [0, 0, 0])
     };
 
 
@@ -56,18 +77,15 @@ function displayGrid(imageBase64){
 
 }
 
-function manipulatePixels(ctx, width, height, x, y) {
+function manipulatePixels(ctx, width, height, x, y, color) {
     const imageData = ctx.getImageData(0, 0, width, height);
     const data = imageData.data;
-    console.log(imageData)
 
     i = (y * width + x) * 4
 
-    data[i] -= 255
-    data[i+1] -= 255
-
-
-    console.log(imageData)
+    data[i] = color[0]
+    data[i+1] = color[1]
+    data[i+2] = color[2]
 
     ctx.putImageData(imageData, 0, 0)
 }
