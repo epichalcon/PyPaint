@@ -68,7 +68,6 @@ function displayGrid(imageBase64){
         container.width = img.width;
         container.height = img.height;
         context.drawImage(img, 0, 0);
-        manipulatePixels(context, img.width, img.height, 0,0, [0, 0, 0])
     };
 
 
