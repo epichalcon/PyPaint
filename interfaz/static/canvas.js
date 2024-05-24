@@ -83,9 +83,9 @@ function manipulatePixels(ctx, width, height, x, y, color) {
 
     i = (y * width + x) * 4
 
-    data[i] = color[0]
-    data[i+1] = color[1]
-    data[i+2] = color[2]
+    data[i] = color[2] // Red
+    data[i+1] = color[1] // Green
+    data[i+2] = color[0] // Blue
 
     ctx.putImageData(imageData, 0, 0)
 }
