@@ -1,8 +1,9 @@
-function uploadImage() {
-    const file = document.getElementById('image').files[0];
+document.getElementById('uploadForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
     const formData = new FormData();
-    console.log(file)
-    formData.append('image', file);
+    const fileInput = document.getElementById('image');
+    formData.append('image', fileInput.files[0]);
 
     fetch('http://localhost:5000/upload', {
         method: 'POST',
@@ -11,11 +12,15 @@ function uploadImage() {
     .then(response => response.json())
     .then(data => {
         console.log(data);
+        if (data.error) {
+            alert('Error: ' + data.error);
+        } else {
+            alert('Success: ' + data.message);
+            window.location.href = "../canvas";
+        }
     })
     .catch(error => {
-        console.error(error);
+        console.error('Error:', error);
+        alert('An error occurred while uploading the file.');
     });
-
-    window.location.href = "../canvas";
-}
-
+});

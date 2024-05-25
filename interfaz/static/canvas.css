@@ -1,0 +1,44 @@
+/*body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+*/
+
+#container {
+    border: 1px solid black;
+}
+
+#color-buttons {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.8); /* Optional: semi-transparent background */
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Optional: slight shadow for separation */
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+button {
+
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transform: scale(1);
+    transform-origin: bottom;
+}
+
+@media screen and (min-width: 0px) {
+    body {
+        zoom: 1; /* This might be necessary for older browsers */
+    }
+}

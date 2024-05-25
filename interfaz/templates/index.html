@@ -4,14 +4,14 @@
     <title>Subir imagen</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta charset="utf-8">
-	<link rel="shortcut icon" href="/assets/favicon.ico">
 	<link rel="stylesheet" href="{{url_for('static', filename='index.css')}}">
 </head>
 <body id='my-body'>
     <h1>Subir imagen</h1>
-    <input type="file" id="image" accept="image/*">
-    <button onclick="uploadImage()">Subir imagen</button>
-
+    <form id="uploadForm">
+	<input type="file" id="image" accept="image/*">
+        <button type="submit">Upload</button>
+    </form>
     <script src="{{url_for('static', filename='index.js')}}"></script>
 </body>
 </html>

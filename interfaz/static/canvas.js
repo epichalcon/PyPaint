@@ -7,6 +7,7 @@ var centerY
 var image
 
 var blockSize = 3
+var colorNumber = 0
 
 window.onload = function() {
     container = document.querySelector("#container"); 
@@ -33,10 +34,14 @@ window.onload = function() {
         .then(data => {
             console.log('Response from server:', data);
 
-            data.coordinates.forEach(pixel => {
-                manipulatePixels(ctx, container.width, container.height, pixel[1], pixel[0], data.color)
-            });
-
+            if (colorNumber == data.number) {
+                data.coordinates.forEach(pixel => {
+                    manipulatePixels(ctx, container.width, container.height, pixel[1], pixel[0], data.color)
+                });
+            }
+            else {
+                console.log('not the correct color')
+            }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -45,16 +50,19 @@ window.onload = function() {
     });
 }
 
+document.addEventListener('DOMContentLoaded', function() {
 
-fetch('http://localhost:5000/process', {
-    method: 'GET',
-})
-.then(response => response.json())
-.then(data => {
-    displayGrid(data.image)
-})
-.catch(error => {
-    console.error(error);
+    fetch('http://localhost:5000/process', {
+        method: 'GET',
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayGrid(data.image)
+        displayButtons(data.colors)
+    })
+    .catch(error => {
+        console.error(error);
+    });
 });
 
 
@@ -71,6 +79,7 @@ function displayGrid(imageBase64){
     };
 
 
+    document.getElementById('container').classList.remove('hidden');
     console.log('finished')
 
 
@@ -89,3 +98,38 @@ function manipulatePixels(ctx, width, height, x, y, color) {
     ctx.putImageData(imageData, 0, 0)
 }
 
+function displayButtons(colors) {
+    console.log(colors)
+    // Get the buttons
+    const buttons = [
+        document.getElementById('color-0'),
+        document.getElementById('color-1'),
+        document.getElementById('color-2'),
+        document.getElementById('color-3'),
+        document.getElementById('color-4'),
+        document.getElementById('color-5'),
+        document.getElementById('color-6'),
+        document.getElementById('color-7'),
+        document.getElementById('color-8'),
+        document.getElementById('color-9'),
+    ];
+    
+    // Apply the colors to the buttons
+    buttons.forEach((button, index) => {
+        if (button && colors[index]) {
+            button.addEventListener('click', function() {
+                updateActiveColor(index);
+            });
+            const [b, g, r] = colors[index];
+            button.style.background = `rgb(${r}, ${g}, ${b})`;
+        }
+    });
+    
+    // Make the button container visible
+    document.getElementById('color-buttons').classList.remove('hidden');
+}
+
+function updateActiveColor(newColorNumber){
+    colorNumber = newColorNumber
+    console.log(colorNumber)
+}

@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, jsonify
 from Pypainting import pypainting
-from Pypainting.contours import Contour
 
 
 app = Flask(__name__)
@@ -32,11 +31,10 @@ def upload_image():
 
 @app.route('/process', methods=['GET'])
 def get_processed_images():
-    global image_name
     global regions 
     global centers
     edges, regions, centers = pypainting.main(image_name)
-    return jsonify({'image': edges})
+    return jsonify({'image': edges, 'colors': centers.tolist()})
 
 @app.route('/region', methods=['POST'])
 def get_region_from_pixel():
@@ -49,7 +47,7 @@ def get_region_from_pixel():
         contour = regions[coordinates_key]
         print(contour)
 
-        return jsonify({'status': 'success', 'coordinates': list(contour.coords), 'color': list(centers[contour.color])}), 200
+        return jsonify({'status': 'success', 'coordinates': list(contour.coords), 'color': list(centers[contour.color]), 'number': int(contour.color)}), 200
     else:
         return jsonify({'status': 'error', 'message': 'Coordinates not found'}), 404
 
