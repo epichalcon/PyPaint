@@ -8,6 +8,7 @@ var image
 
 var blockSize = 3
 var colorNumber = 0
+var color_index
 
 window.onload = function() {
     container = document.querySelector("#container"); 
@@ -34,13 +35,23 @@ window.onload = function() {
         .then(data => {
             console.log('Response from server:', data);
 
+
+
             if (colorNumber == data.number) {
+                const imageData = ctx.getImageData(0, 0, container.width, container.height);
+                const img_arr = imageData.data;
+
+
                 data.coordinates.forEach(pixel => {
-                    manipulatePixels(ctx, container.width, container.height, pixel[1], pixel[0], data.color)
+                    manipulatePixels(img_arr, container.width, pixel[1], pixel[0], data.color)
                 });
+                    
+                ctx.putImageData(imageData, 0, 0)
             }
             else {
-                console.log('not the correct color')
+                if (data.number != undefined) {
+                    alert('Not the correct color, the correct color is: ' + data.number);
+                }
             }
         })
         .catch(error => {
@@ -59,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(data => {
         displayGrid(data.image)
         displayButtons(data.colors)
+        color_index = data.colors
     })
     .catch(error => {
         console.error(error);
@@ -81,21 +93,16 @@ function displayGrid(imageBase64){
 
     document.getElementById('container').classList.remove('hidden');
     console.log('finished')
-
-
 }
 
-function manipulatePixels(ctx, width, height, x, y, color) {
-    const imageData = ctx.getImageData(0, 0, width, height);
-    const data = imageData.data;
+function manipulatePixels(img_array, width, x, y, color) {
 
     i = (y * width + x) * 4
 
-    data[i] = color[2] // Red
-    data[i+1] = color[1] // Green
-    data[i+2] = color[0] // Blue
+    img_array[i] = color[2] // Red
+    img_array[i+1] = color[1] // Green
+    img_array[i+2] = color[0] // Blue
 
-    ctx.putImageData(imageData, 0, 0)
 }
 
 function displayButtons(colors) {
@@ -132,4 +139,7 @@ function displayButtons(colors) {
 function updateActiveColor(newColorNumber){
     colorNumber = newColorNumber
     console.log(colorNumber)
+
+    const [b, g, r] = color_index[newColorNumber];
+    document.body.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
 }
