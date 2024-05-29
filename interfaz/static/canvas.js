@@ -70,7 +70,15 @@ document.addEventListener('DOMContentLoaded', function() {
     .then(data => {
         displayGrid(data.image)
         displayButtons(data.colors)
+
         color_index = data.colors
+        document.addEventListener('keydown', (event) => {
+            const key = event.key;
+            if (key >= '0' && key <= '9') {
+                updateActiveColor(parseInt(key));
+            }
+        });
+
     })
     .catch(error => {
         console.error(error);
