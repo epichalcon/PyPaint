@@ -3,5 +3,4 @@ pyrightconfig.json
 /results/*
 /__pycache__/*
 /Pypainting/__pycache__/*
-/static/images/results/*
-/static/images/*.jpg
+/static/images/

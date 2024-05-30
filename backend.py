@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 from Pypainting import pypainting
+import os
 
 
 app = Flask(__name__)
@@ -7,6 +8,14 @@ app = Flask(__name__)
 image_name : str | None
 regions = {}
 centers = []
+
+
+# Function to ensure directories exist
+def ensure_directories():
+    os.makedirs('./static/images/results', exist_ok=True)
+
+# Call the function to ensure the directories exist
+ensure_directories()
 
 @app.route('/upload', methods=['POST'])
 def upload_image():
