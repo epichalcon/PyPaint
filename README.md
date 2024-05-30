@@ -22,7 +22,6 @@ pip install -r requirements.txt
 
 export FLASK_APP=backend  # On Windows, use `set FLASK_APP=app.py`
 export FLASK_ENV=development  # On Windows, use `set FLASK_ENV=development`
-cd interfaz
 flask run
 ```
 
