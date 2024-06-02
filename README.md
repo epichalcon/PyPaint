@@ -15,7 +15,7 @@ This is an implementation of the famous Paint By Numbers idea in python. It has 
 git clone https://github.com/epichalcon/PyPaint.git
 cd PyPaint
 
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
 
 pip install -r requirements.txt
