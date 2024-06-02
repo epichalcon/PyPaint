@@ -35,6 +35,7 @@ button {
     cursor: pointer;
     transform: scale(1);
     transform-origin: bottom;
+    border-radius: 5px;
 }
 
 @media screen and (min-width: 0px) {
