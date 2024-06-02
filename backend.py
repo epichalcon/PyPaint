@@ -22,7 +22,7 @@ def upload_image():
     global image_name
     print(request.files)
     if 'image' not in request.files:
-        return jsonify({'error': 'No se ha subido ninguna imagen'}), 400
+        return jsonify({'error': 'No image could be uploaded'}), 400
 
     image_file = request.files['image']
 
@@ -33,7 +33,7 @@ def upload_image():
     print(image_name)
     
     # Enviar una respuesta JSON con el nombre de la imagen
-    return jsonify({'message': f'Imagen subida correctamente: {image_name}'})
+    return jsonify({'message': f'The image was suscesfully uploaded: {image_name}'})
 
 
 
